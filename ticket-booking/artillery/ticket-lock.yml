@@ -1,0 +1,28 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 20
+      arrivalRate: 20
+  payload:
+    - path: "users.csv"
+      fields:
+        - "userId"
+scenarios:
+  - name: "Concurrent lock same seat"
+    flow:
+      - post:
+          url: "/api/tickets/events/e1/seats/init"
+          json:
+            seatCount: 10
+      - post:
+          url: "/api/tickets/events/e1/seats/1/lock"
+          json:
+            userId: "{{ userId }}"
+          capture:
+            - json: "$.lockId"
+              as: "lockId"
+      - post:
+          url: "/api/tickets/events/e1/seats/1/confirm"
+          json:
+            userId: "{{ userId }}"
+            lockId: "{{ lockId }}"
